@@ -171,6 +171,11 @@ p {
 }
 
 
+.card-text {
+    color: #000;
+    font-size: 12px;
+}
+
 .list-group {
     border-radius: 20px;
 }
