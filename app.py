@@ -1,5 +1,5 @@
 import time
-# import generate_playlists as gp
+import generate_playlists as gp
 import spotipy as sp
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect, render_template
@@ -40,12 +40,14 @@ def callback():
 # Display user's playlists
 @app.route('/playlists', methods=['GET', 'POST'])
 def playlists():
+    # Make sure user is logged in
     try:
         token_info = get_token()
     except:
         return redirect(url_for('login'))
     
     if request.method == 'GET':
+        # Retrieve user info and user's playlists
         spotify = sp.Spotify(auth=token_info['access_token'])
         user = spotify.current_user()
         display_name = user['display_name']
@@ -58,6 +60,7 @@ def playlists():
 # Playlist generation options
 @app.route('/select_option', methods=['GET', 'POST'])
 def select_option():
+    # Make sure user is logged in
     try:
         get_token()
     except:
@@ -66,9 +69,31 @@ def select_option():
     if request.method == 'GET':
         return render_template("select_option.html")
     else:
+        # Retrieve ids of selected playlists
         selected_playlists = request.form.get('selected_playlists').split(',')
         session['selected_playlists'] = selected_playlists
+        
         return render_template("select_option.html")
+
+# Generate playlist(s) and display them
+@app.route('/result', methods=['GET', 'POST'])
+def result():
+    # Make sure user is logged in
+    try:
+        token_info = get_token()
+    except:
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template("result.html")
+    else:
+        # Retrieve selected option
+        option = request.form.get('option')
+        
+        # Generate playlist(s) based on selected option
+        new_playlists = gp.generate(option, session['selected_playlists'])
+
+        return ""
 
 
 '''
