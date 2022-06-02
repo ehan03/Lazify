@@ -1,19 +1,33 @@
-from sklearn.cluster import KMeans
+# from sklearn.cluster import KMeans
 import spotipy as sp
 import pandas as pd
 import numpy as np
 
-def cluster():
+def cluster(selected_playlists):
     pass
 
-def same_artist():
+def semantic(selected_playlists):
     pass
 
-def semantics():
+def artists(selected_playlists):
     pass
 
-def remove_duplicates(playlist_id):
+def merge(selected_playlists):
     pass
 
-def create_playlist():
+def remove_duplicates(selected_playlists):
     pass
+
+def get_tracks(playlist_id):
+    pass
+
+def generate(option, selected_playlists):
+    options = {
+        "cluster": cluster,
+        "semantic": semantic,
+        "artists": artists,
+        "merge": merge,
+        "remove_duplicates": remove_duplicates
+    }
+
+    return options[option](selected_playlists)
