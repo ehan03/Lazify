@@ -84,9 +84,7 @@ def result():
     except:
         return redirect(url_for('login'))
 
-    if request.method == 'GET':
-        return render_template("result.html")
-    else:
+    if request.method == 'POST':
         # Retrieve selected option
         option = request.form.get('option')
         
@@ -95,11 +93,11 @@ def result():
         user_id = spotify.current_user()['id']
 
         # Main big brain stuff
-        test = gp.generate(option, spotify, user_id, session['selected_playlists'])
+        new_playlists = gp.generate(option, spotify, user_id, session['selected_playlists'])
 
-        print(test)
+        print(new_playlists)
 
-        return ""
+        return render_template("result.html")
 
 
 '''
