@@ -90,8 +90,14 @@ def result():
         # Retrieve selected option
         option = request.form.get('option')
         
-        # Generate playlist(s) based on selected option
-        new_playlists = gp.generate(option, session['selected_playlists'])
+        # Spotify object and user id needed to fetch tracks, get audio features, and create/modify playlists
+        spotify = sp.Spotify(auth=token_info['access_token'])
+        user_id = spotify.current_user()['id']
+
+        # Main big brain stuff
+        test = gp.generate(option, spotify, user_id, session['selected_playlists'])
+
+        print(test)
 
         return ""
 
