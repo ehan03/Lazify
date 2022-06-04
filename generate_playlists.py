@@ -12,7 +12,7 @@ def cluster(user_id, selected_playlists):
 def semantic(user_id, selected_playlists):
     pass
 
-def artists(user_id, selected_playlists):
+def artists(spotify, user_id, artist, selected_playlists):
     pass
 
 # Merge two or more playlists into one
@@ -35,11 +35,12 @@ def merge(spotify, user_id, selected_playlists):
     for playlist in selected_playlists:
         names.append(spotify.user_playlist(user_id, playlist)['name'])
 
-    new_name = "Merged " + " + ".join(names)
+    new_name = "[Lazify] Merged " + " + ".join(names)
 
     return [make_playlist(spotify, user_id, new_name, uris)]
 
 # Remove duplicate tracks from playlists
+# To-do: Only accounts for identical uris, might be problematic if identical tracks were released as single and in album
 def remove_duplicates(spotify, user_id, selected_playlists):
     for playlist in selected_playlists:
         uris = get_track_uris(spotify, user_id, playlist)
@@ -69,6 +70,21 @@ def get_track_uris(spotify, user_id, playlist):
         uris.append(track['track']['uri'])
 
     return uris
+
+# Retrieve unique artists from playlists
+def get_artists(spotify, user_id, selected_playlists):
+    artists = []
+    for playlist in selected_playlists:
+        results = spotify.user_playlist_tracks(user_id, playlist)
+        tracks = results['items']
+        while results['next']:
+            results = spotify.next(results)
+            tracks.extend(results['items'])
+        
+        for track in tracks:
+            artists.append(track['track']['artists'][0]['name'])
+
+    return list(set(artists))
 
 # Retrieve everything about each track in a playlist
 # Includes name, artist, uri, and relevant audio features
