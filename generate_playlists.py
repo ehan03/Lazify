@@ -2,6 +2,10 @@
 import spotipy as sp
 import pandas as pd
 
+'''
+Main functions used to generate playlists
+Also handles retrieving track information
+'''
 def cluster(user_id, selected_playlists):
     pass
 
@@ -15,7 +19,7 @@ def artists(user_id, selected_playlists):
 # Adds only unique tracks so playlists with overlapping tracks aren't problematic
 def merge(spotify, user_id, selected_playlists):
     # In case user only selected one playlist, don't do anything and return playlist id
-    # To-do: Consider checking beforehand at option selection page
+    # To-do: Consider checking number of selected playlists at option selection page to avoid this
     if len(selected_playlists) == 1:
         return selected_playlists
 
@@ -67,9 +71,58 @@ def get_track_uris(spotify, user_id, playlist):
     return uris
 
 # Retrieve everything about each track in a playlist
-# Includes name, artist, uri, and audio features
+# Includes name, artist, uri, and relevant audio features
 def get_track_features(spotify, user_id, playlist):
-    pass
+    # Track info
+    results = spotify.user_playlist_tracks(user_id, playlist)
+    tracks = results['items']
+    names, artists, uris = [], [], []
+
+    while results['next']:
+        results = spotify.next(results)
+        tracks.extend(results['items'])
+    
+    for track in tracks:
+        names.append(track['track']['name'])
+        artists.append(track['track']['artists'][0]['name'])
+        uris.append(track['track']['uri'])
+
+    # Audio features
+    offset = 0
+    all_features = []
+    acousticness, danceability, energy, instrumentalness, liveness, loudness, speechiness, valence = [], [], [], [], [], [], [], []
+    
+    while offset < len(uris):
+        all_features = spotify.audio_features(uris[offset:offset+100])
+        offset += 100
+    
+    for features in all_features:
+        acousticness.append(features['acousticness'])
+        danceability.append(features['danceability'])
+        energy.append(features['energy'])
+        instrumentalness.append(features['instrumentalness'])
+        liveness.append(features['liveness'])
+        loudness.append(features['loudness'])
+        speechiness.append(features['speechiness'])
+        valence.append(features['valence'])
+
+    # Combine everything
+    data = {
+            "name": names, 
+            "artist": artists, 
+            "uri": uris,
+            "acousticness": acousticness,
+            "danceability": danceability,
+            "energy": energy,
+            "instrumentalness": instrumentalness,
+            "liveness": liveness,
+            "loudness": loudness,
+            "speechiness": speechiness,
+            "valence": valence
+        }
+    
+    df = pd.DataFrame(data)
+    return df
 
 # Create playlist given a name and a list of track uris
 def make_playlist(spotify, user_id, name, uris):
