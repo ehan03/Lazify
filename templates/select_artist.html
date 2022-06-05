@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <body class="text-break" style="background-image: linear-gradient(50deg, #4c39cb 0%, #288ec1 80%);">
+
+        <div class="container text-center hi">
+            <p>
+                Choose the artist(s).
+            </p>
+        </div>
+
+        <br>
+
+        <div class="list-group">
+            {% for artist in artists %}
+
+                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center artists" data-id="{{ artist }}">
+                    <span>{{ artist }}</span>
+                </a>
+
+            {% endfor %}
+        </div>
+
+        <div class="text-center next-btn-div">
+            <form action="/result" method="POST" onsubmit="return validateSelectArtists();">
+                <input type="hidden" id="selected_artists" name="selected_artists" value="">
+                <button class="btn next-btn btn-primary" type="submit" onclick="getArtists()">
+                    Go
+                </button>
+            </form>
+        </div>
+
+    </body>
+
+{% endblock %}

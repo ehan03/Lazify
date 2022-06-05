@@ -35,3 +35,33 @@ function validateSelectPlaylists() {
         return false;
     }
 }
+
+function getSelectedArtists() {
+    let artists = document.getElementsByClassName("list-group-item list-group-item-action d-flex justify-content-between align-items-center artists active");
+
+    if (artists.length >= 1) {
+        let result = [];
+        for (let i = 0; i < artists.length; i++) {
+            result.push(artists[i].getAttribute("data-id"));
+        }
+
+        return result;
+    } else {
+        return false;
+    }
+}
+
+function getArtists() {
+    let val_tag = document.getElementById('selected_artists');
+    val_tag.value = getSelectedArtists();
+}
+
+function validateSelectArtists() {
+    let artists = document.getElementsByClassName("list-group-item list-group-item-action d-flex justify-content-between align-items-center artists active");
+    if (artists.length >= 1) {
+        return true;
+    } else {
+        alert("Please select at least one (1) artist");
+        return false;
+    }
+}
