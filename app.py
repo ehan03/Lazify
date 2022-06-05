@@ -75,6 +75,23 @@ def select_option():
         
         return render_template("select_option.html")
 
+# Artist selection, specific to "Artist" option
+@app.route('/select_artist', methods=['GET', 'POST'])
+def select_artist():
+    try:
+        token_info = get_token()
+    except:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        spotify = sp.Spotify(auth=token_info['access_token'])
+        user_id = spotify.current_user()['id']
+        artists = sorted(gp.get_artists(spotify, user_id, session['selected_playlists']))
+
+        return render_template("select_artist.html", artists=artists)
+    
+    return render_template("select_artist.html")
+
 # Generate playlist(s) and display them
 @app.route('/result', methods=['GET', 'POST'])
 def result():
@@ -85,19 +102,18 @@ def result():
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        # Retrieve selected option
-        option = request.form.get('option')
-        
-        # Spotify object and user id needed to fetch tracks, get audio features, and create/modify playlists
+        new_playlists = []
         spotify = sp.Spotify(auth=token_info['access_token'])
         user_id = spotify.current_user()['id']
 
-        # Main big brain stuff
-        new_playlists = gp.generate(option, spotify, user_id, session['selected_playlists'])
+        if "option" in request.form:
+            option = request.form.get('option')
+            new_playlists = gp.generate(option, spotify, user_id, session['selected_playlists'])
+        elif "selected_artists" in request.form:
+            selected_artists = request.form.get('selected_artists').split(',')
+            new_playlists = gp.artists(spotify, user_id, selected_artists, session['selected_playlists'])
 
-        print(new_playlists)
-
-        return render_template("result.html")
+        return render_template("result.html", new_playlists=new_playlists)
 
 
 '''
