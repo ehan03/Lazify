@@ -22,7 +22,7 @@
                 {% set playlist_id = playlist['id'] %}
                 {% set playlist_img_url = playlist['images'][0]['url'] %}
 
-                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center playlists" data-id="{{ playlist_id }}">
+                <a class="list-group-item selectable list-group-item-action d-flex justify-content-between align-items-center playlists" data-id="{{ playlist_id }}">
                     <span>{{ playlist_name }}</span>
                     <div>
                         <img src="{{ playlist_img_url }}" style="max-width: 47px;" alt="">

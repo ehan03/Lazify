@@ -1,4 +1,4 @@
-$(".list-group-item").click(function() {
+$(".selectable").click(function() {
     if (this.classList.contains("active")) {
         this.classList.remove("active");
     } else {
@@ -7,7 +7,7 @@ $(".list-group-item").click(function() {
 });
 
 function getSelectedPlaylists() {
-    let playlists = document.getElementsByClassName("list-group-item list-group-item-action d-flex justify-content-between align-items-center playlists active");
+    let playlists = document.getElementsByClassName("list-group-item selectable list-group-item-action d-flex justify-content-between align-items-center playlists active");
 
     if (playlists.length >= 1) {
         let result = [];
@@ -27,7 +27,7 @@ function getPlaylists() {
 }
 
 function validateSelectPlaylists() {
-    let playlists = document.getElementsByClassName("list-group-item list-group-item-action d-flex justify-content-between align-items-center playlists active");
+    let playlists = document.getElementsByClassName("list-group-item selectable list-group-item-action d-flex justify-content-between align-items-center playlists active");
     if (playlists.length >= 1) {
         return true;
     } else {
@@ -37,7 +37,7 @@ function validateSelectPlaylists() {
 }
 
 function getSelectedArtists() {
-    let artists = document.getElementsByClassName("list-group-item list-group-item-action d-flex justify-content-between align-items-center artists active");
+    let artists = document.getElementsByClassName("list-group-item selectable list-group-item-action d-flex justify-content-between align-items-center artists active");
 
     if (artists.length >= 1) {
         let result = [];
@@ -57,7 +57,7 @@ function getArtists() {
 }
 
 function validateSelectArtists() {
-    let artists = document.getElementsByClassName("list-group-item list-group-item-action d-flex justify-content-between align-items-center artists active");
+    let artists = document.getElementsByClassName("list-group-item selectable list-group-item-action d-flex justify-content-between align-items-center artists active");
     if (artists.length >= 1) {
         return true;
     } else {
