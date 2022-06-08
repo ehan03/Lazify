@@ -102,18 +102,21 @@ def result():
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        new_playlists = []
+        new_playlist_ids = []
         spotify = sp.Spotify(auth=token_info['access_token'])
         user_id = spotify.current_user()['id']
 
+        # Check for each of the routes
         if "option" in request.form:
             option = request.form.get('option')
-            new_playlists = gp.generate(option, spotify, user_id, session['selected_playlists'])
+            new_playlist_ids = gp.generate(option, spotify, user_id, session['selected_playlists'])
         elif "selected_artists" in request.form:
             selected_artists = request.form.get('selected_artists').split(',')
-            new_playlists = gp.artists(spotify, user_id, selected_artists, session['selected_playlists'])
+            new_playlist_ids = gp.artists(spotify, user_id, selected_artists, session['selected_playlists'])
 
-        return render_template("result.html", new_playlists=new_playlists)
+        sources = [f"https://open.spotify.com/embed/playlist/{new_playlist_id}?utm_source=generator&theme=0" for new_playlist_id in new_playlist_ids]
+
+        return render_template("result.html", sources=sources)
 
 
 '''
