@@ -3,7 +3,29 @@
 
     <body class="text-break" style="background-image: linear-gradient(50deg, #7e32b8 0%, #61b79c 80%);">
 
+        <div class="container text-center hi">
+            <p>
+                Here are your new/modified playlists to check out!<br>
+                Click on the playlist to open it in Spotify!
+            </p>
+        </div>
 
+        <div class="list-group">
+            {% for source in sources %}
+                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <iframe style="border-radius:12px" src="{{ source }}" width="100%" height="380" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+                    </iframe>
+                </a>
+            {% endfor %}
+        </div>
+
+        <div class="text-center" style="padding-top: 47px;">
+            <a href="{{ url_for('playlists') }}">
+                <button class="btn btn-primary">
+                    Back to playlists
+                </button>
+            </a>
+        </div>
 
     </body>
 
