@@ -12,8 +12,39 @@ def cluster(user_id, selected_playlists):
 def semantic(user_id, selected_playlists):
     pass
 
-def artists(spotify, user_id, artist, selected_playlists):
-    pass
+def artists(spotify, user_id, selected_artists, selected_playlists):
+    data = pd.DataFrame()
+    for playlist in selected_playlists:
+        df = get_track_features(spotify, user_id, playlist)[['uri', 'artist']]
+        data = data.append(df)
+    data = data.drop_duplicates()
+
+    # Get user's current playlists
+    current_playlists = spotify.current_user_playlists()['items']
+    current_playlist_ids = [playlist['id'] for playlist in current_playlists]
+    current_playlist_names = [playlist['name'] for playlist in current_playlists]
+
+    # Make the playlist(s)
+    new_playlist_ids = []
+    for artist in selected_artists:
+        uris = data[data['artist'] == artist]['uri'].tolist()
+        name = "[Lazify] Artist: " + artist
+
+        # Check if playlist for that artist already exists
+        if name in current_playlist_names:
+            index = current_playlist_names.index(name)
+            new_playlist_ids.append(current_playlist_ids[index])
+
+            offset = 0
+            while offset < len(uris):
+                spotify.user_playlist_add_tracks(user_id, current_playlist_ids[index], uris[offset:offset+100])
+                offset += 100
+
+        # If not, make a new playlist
+        else:
+            new_playlist_ids.append(make_playlist(spotify, user_id, name, uris))
+    
+    return remove_duplicates(spotify, user_id, new_playlist_ids)
 
 # Merge two or more playlists into one
 # Adds only unique tracks so playlists with overlapping tracks aren't problematic
@@ -23,19 +54,13 @@ def merge(spotify, user_id, selected_playlists):
     if len(selected_playlists) == 1:
         return selected_playlists
 
-    # Get unique track uris
-    uris = []
+    uris, names = [], []
     for playlist in selected_playlists:
         uris.extend(get_track_uris(spotify, user_id, playlist))
+        names.append(spotify.user_playlist(user_id, playlist)['name'])
     
     uris = list(set(uris))
-
-    # Get names of selected playlists
-    names = []
-    for playlist in selected_playlists:
-        names.append(spotify.user_playlist(user_id, playlist)['name'])
-
-    new_name = "[Lazify] Merged " + " + ".join(names)
+    new_name = "[Lazify] Merged: " + " + ".join(names)
 
     return [make_playlist(spotify, user_id, new_name, uris)]
 
@@ -50,7 +75,6 @@ def remove_duplicates(spotify, user_id, selected_playlists):
         if len(unique_uris) == len(uris):
             continue
         
-        # Modify playlist in place
         spotify.user_playlist_replace_tracks(user_id, playlist, unique_uris)
 
     return selected_playlists
@@ -107,9 +131,9 @@ def get_track_features(spotify, user_id, playlist):
     offset = 0
     all_features = []
     acousticness, danceability, energy, instrumentalness, liveness, loudness, speechiness, valence = [], [], [], [], [], [], [], []
-    
+
     while offset < len(uris):
-        all_features = spotify.audio_features(uris[offset:offset+100])
+        all_features += spotify.audio_features(uris[offset:offset+100])
         offset += 100
     
     for features in all_features:
@@ -156,7 +180,6 @@ def generate(option, spotify, user_id, selected_playlists):
     options = {
         "cluster": cluster,
         "semantic": semantic,
-        "artists": artists,
         "merge": merge,
         "remove_duplicates": remove_duplicates
     }
