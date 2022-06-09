@@ -1,4 +1,10 @@
-# from sklearn.cluster import KMeans
+import os
+
+# Work around for Fortran and Ctrl+C handling
+os.environ['FOR_DISABLE_CONSOLE_CTRL_HANDLER'] = '1'
+
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.cluster import KMeans
 import spotipy as sp
 import pandas as pd
 
@@ -6,11 +12,25 @@ import pandas as pd
 Main functions used to generate playlists
 Also handles retrieving track information
 '''
-def cluster(user_id, selected_playlists):
-    pass
+def cluster(spotify, user_id, selected_playlists):
+    data = pd.DataFrame()
+    for playlist in selected_playlists:
+        df = get_track_features(spotify, user_id, playlist)[['uri', 'acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'loudness', 'speechiness', 'valence']]
+        data = data.append(df)
+    data = data.drop_duplicates()
 
-def semantic(user_id, selected_playlists):
-    pass
+    # Normalize audio feature data
+    scaler = MinMaxScaler()
+    data.iloc[:, 1:] = scaler.fit_transform(data.iloc[:, 1:])
+
+def semantic(spotify, user_id, selected_playlists):
+    data = pd.DataFrame()
+    for playlist in selected_playlists:
+        df = get_track_features(spotify, user_id, playlist)[['uri', 'name']]
+        data = data.append(df)
+    data = data.drop_duplicates()
+
+    # To-do
 
 def artists(spotify, user_id, selected_artists, selected_playlists):
     data = pd.DataFrame()
