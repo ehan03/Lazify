@@ -15,6 +15,7 @@ import numpy as np
 Main functions used to generate playlists
 Also handles retrieving track information
 '''
+# Cluster tracks of the selected playlists by audio features
 def cluster(spotify, user_id, selected_playlists):
     data = pd.DataFrame()
     for playlist in selected_playlists:
@@ -56,6 +57,7 @@ def cluster(spotify, user_id, selected_playlists):
     
     return new_playlist_ids
 
+# Cluster tracks of the selected playlists by title based on semantic similarity
 def semantic(spotify, user_id, selected_playlists):
     data = pd.DataFrame()
     for playlist in selected_playlists:
@@ -65,6 +67,7 @@ def semantic(spotify, user_id, selected_playlists):
 
     # To-do
 
+# Separate tracks of the selected playlists by the selected artists
 def artists(spotify, user_id, selected_artists, selected_playlists):
     data = pd.DataFrame()
     for playlist in selected_playlists:
