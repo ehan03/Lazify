@@ -4,9 +4,12 @@ import os
 os.environ['FOR_DISABLE_CONSOLE_CTRL_HANDLER'] = '1'
 
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 import spotipy as sp
 import pandas as pd
+import numpy as np
 
 '''
 Main functions used to generate playlists
@@ -21,7 +24,37 @@ def cluster(spotify, user_id, selected_playlists):
 
     # Normalize audio feature data
     scaler = MinMaxScaler()
-    data.iloc[:, 1:] = scaler.fit_transform(data.iloc[:, 1:])
+    data_std = scaler.fit_transform(data.iloc[:, 1:])
+
+    # PCA
+    # Arbitrarily chose 0.8 as cutoff for explained variance
+    pca = PCA(n_components=0.8)
+    reduced = pca.fit_transform(data_std)
+
+    # Find optimal number of clusters using silhouette score
+    # Arbitrarily chose 20 as max number of clusters
+    N_MAX = 20
+    silhouette_scores = []
+    for i in range(2, N_MAX + 1):
+        clusterer = KMeans(n_clusters=i, init="k-means++", random_state=1738)
+        cluster_labels = clusterer.fit_predict(reduced)
+        silhouette_scores.append(silhouette_score(reduced, cluster_labels))
+    n_clusters = np.argmax(silhouette_scores) + 2
+
+    # Cluster
+    kmeans = KMeans(n_clusters=n_clusters, init="k-means++", random_state=1738)
+    cluster_labels = kmeans.fit_predict(reduced)
+    data["cluster"] = cluster_labels
+
+    # Make new playlists
+    selected_playlists_names = [spotify.user_playlist(user_id, playlist)['name'] for playlist in selected_playlists]
+    new_playlist_ids = []
+    for i in range(n_clusters):
+        uris = data[data['cluster'] == i]['uri'].tolist()
+        name = "[Lazify] Cluster #" + str(i + 1) + ": " + " + ".join(selected_playlists_names)
+        new_playlist_ids.append(make_playlist(spotify, user_id, name, uris))
+    
+    return new_playlist_ids
 
 def semantic(spotify, user_id, selected_playlists):
     data = pd.DataFrame()
