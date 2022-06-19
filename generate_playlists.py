@@ -57,15 +57,9 @@ def cluster(spotify, user_id, selected_playlists):
     
     return new_playlist_ids
 
-# Cluster tracks of the selected playlists by title based on semantic similarity
-def semantic(spotify, user_id, selected_playlists):
-    data = pd.DataFrame()
-    for playlist in selected_playlists:
-        df = get_track_features(spotify, user_id, playlist)[['uri', 'name']]
-        data = data.append(df)
-    data = data.drop_duplicates()
-
-    # To-do
+# Create a playlist of recommended tracks based on the selected playlists
+def recommend(spotify, user_id, selected_playlists):
+    pass
 
 # Separate tracks of the selected playlists by the selected artists
 def artists(spotify, user_id, selected_artists, selected_playlists):
@@ -235,7 +229,7 @@ def make_playlist(spotify, user_id, name, uris):
 def generate(option, spotify, user_id, selected_playlists):
     options = {
         "cluster": cluster,
-        "semantic": semantic,
+        "recommend": recommend,
         "merge": merge,
         "remove_duplicates": remove_duplicates
     }
