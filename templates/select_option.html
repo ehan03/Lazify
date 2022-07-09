@@ -35,7 +35,7 @@
                         <div class="card-body d-flex flex-column">
                             <h4 class="card-title">Recommend</h4>
                             <p class="card-text">
-                                Attempts to create a playlist of recommended tracks based on the those of the selected playlists.
+                                Creates a playlist of 25 recommended tracks with the highest cosine similarity based on the songs in the selected playlists.
                             </p>
                             <form action="/result" method="POST">
                                 <button type="submit" class="btn btn-primary mt-auto" name="option" value="recommend">

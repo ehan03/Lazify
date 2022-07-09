@@ -1,34 +1,64 @@
+import os
 import time
-import generate_playlists as gp
 import spotipy as sp
+import generate_playlists as gp
+from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
 from flask import Flask, request, url_for, session, redirect, render_template
-from config import Config
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.secret_key = os.getenv("SECRET_KEY")
 
-
-"""
-Routes
-"""
-# Home page where users log in
 @app.route("/")
 @app.route("/index")
 def index():
+    """Render the home page.
+
+    Render the home page. Users can login or check out the repository.
+
+    Args:
+        None
+    
+    Returns:
+        A rendered template of index.html
+    """
+
     return render_template("index.html")
 
-# Redirect to Spotify for authorization
 @app.route("/login")
 def login():
+    """Login to Spotify.
+
+    Login to Spotify with the OAuth flow and redirect to the callback.
+
+    Args:
+        None
+    
+    Returns:
+        A redirect to the callback
+    """
+
     sp_oauth = create_spotify_oauth()
     auth_url = sp_oauth.get_authorize_url()
 
     return redirect(auth_url)
 
-# Authorization callback
 @app.route("/callback")
 def callback():
+    """Callback for Spotify OAuth.
+    
+    Callback for Spotify OAuth. Gets user's access token and stores it in session, then redirects to the
+    playlist selection page.
+
+    Args:
+        None
+    
+    Returns:
+        A redirect to the playlist selection page
+    """
+
     sp_oauth = create_spotify_oauth()
     session.clear()
     code = request.args.get("code")
@@ -37,9 +67,20 @@ def callback():
 
     return redirect(url_for("playlists", _external=True))
 
-# Display user"s playlists
 @app.route("/playlists", methods=["GET", "POST"])
 def playlists():
+    """Render the playlist selection page.
+    
+    Render the playlist selection page with the user's playlists if the user is logged in. Here, the user
+    can select which playlists(s) to modify or create new playlists from.
+
+    Args:
+        None
+    
+    Returns:
+        A rendered template of playlists.html
+    """
+
     # Make sure user is logged in
     try:
         token_info = get_token()
@@ -57,9 +98,21 @@ def playlists():
     
     return render_template("playlists.html")
 
-# Playlist generation options
 @app.route("/select_option", methods=["GET", "POST"])
 def select_option():
+    """Render option selection page.
+    
+    Render the option selection page. The user's selected playlist(s) is/are stored in the session.
+    On this page, the user can select which option to modify the playlist(s) with or generate
+    new playlists from.
+
+    Args:
+        None
+    
+    Returns:
+        A rendered template of select_option.html
+    """
+
     # Make sure user is logged in
     try:
         get_token()
@@ -75,9 +128,21 @@ def select_option():
         
         return render_template("select_option.html")
 
-# Artist selection, specific to "Artist" option
 @app.route("/select_artist", methods=["GET", "POST"])
 def select_artist():
+    """Render artist selection page.
+    
+    If the user selected the "Artists" option, render the artist selection page. The user can select
+    which artist(s) to create separate songs for.
+
+    Args:
+        None
+    
+    Returns:
+        A rendered template of select_artist.html
+    """
+
+    # Make sure user is logged in
     try:
         token_info = get_token()
     except:
@@ -92,9 +157,19 @@ def select_artist():
     
     return render_template("select_artist.html")
 
-# Generate playlist(s) and display them
 @app.route("/result", methods=["GET", "POST"])
 def result():
+    """Render result page.
+    
+    Render the result page, which displays the new or modified playlist(s) using Spotify embeds.
+
+    Args:
+        None
+    
+    Returns:
+        A rendered template of result.html
+    """
+
     # Make sure user is logged in
     try:
         token_info = get_token()
@@ -118,11 +193,19 @@ def result():
 
         return render_template("result.html", sources=sources)
 
-
-"""
-Helper functions for authorization and token management
-"""
 def get_token():
+    """Get the user's access token.
+    
+    Get the user's access token from the session or call the Spotify OAuth flow if the user has not
+    authenticated yet. If the token has expired, refresh it. Return the token.
+
+    Args:
+        None
+    
+    Returns:
+        The user's access token
+    """
+
     token_info = session.get("token_info", None)
     if token_info is None:
         raise "No token found"
@@ -137,12 +220,23 @@ def get_token():
     return token_info
 
 def create_spotify_oauth():
+    """Create a Spotify OAuth object.
+
+    Create a Spotify OAuth object using the client ID and client secret.
+
+    Args:
+        None
+    
+    Returns:
+        A Spotify OAuth object
+    """
+
     # Parameters for OAuth
-    client_id = app.config["CLIENT_ID"]
-    client_secret = app.config["CLIENT_SECRET"]
+    client_id = os.getenv("CLIENT_ID")
+    client_secret = os.getenv("CLIENT_SECRET")
     with app.app_context():
         redirect_uri = url_for("callback", _external=True)
-    scope = app.config["SCOPE"]
+    scope = os.getenv("SCOPE")
 
     sp_oauth = SpotifyOAuth(client_id, client_secret, redirect_uri, scope=scope)
     return sp_oauth
